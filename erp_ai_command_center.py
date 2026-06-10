@@ -518,37 +518,27 @@ user_features["Anomaly"] = (
     iso.fit_predict(X)
 )
 
-# =====================================
+# # =====================================
 # LOF DETECTION
 # =====================================
 
-lof = LocalOutlierFactor(
-    n_neighbors=5,
-    contamination=0.05
-)
+user_features["LOF_Anomaly"] = 1
 
-user_features["LOF_Anomaly"] = (
-    lof.fit_predict(X)
-)
+if len(user_features) >= 10:
 
-user_features.loc[
-    user_features["LOF_Anomaly"] == -1,
-    "Risk_Score"
-] += 15
+    n_neighbors = min(
+        5,
+        len(user_features)-1
+    )
 
-user_features["Risk_Score"] = (
-    user_features["Risk_Score"]
-    .clip(0,100)
-)
-user_features.loc[
-    user_features["Anomaly"] == -1,
-    "Risk_Score"
-] += 20
+    lof = LocalOutlierFactor(
+        n_neighbors=n_neighbors,
+        contamination=0.05
+    )
 
-user_features["Risk_Score"] = (
-    user_features["Risk_Score"]
-    .clip(0,100)
-)
+    user_features["LOF_Anomaly"] = (
+        lof.fit_predict(X)
+    )
 
 
 # =====================================
