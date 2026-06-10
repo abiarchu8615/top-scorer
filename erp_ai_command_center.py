@@ -555,25 +555,11 @@ if question:
 
     if "highest risk" in q:
 
-        risk_user = user_features.loc[
-            user_features[
-                "Risk_Score"
-            ].idxmax(),
-            "User"
-        ]
-
         st.sidebar.success(
             f"Highest Risk: {risk_user}"
         )
 
     elif "top performer" in q:
-
-        top_user = user_features.loc[
-            user_features[
-                "Productivity_Score"
-            ].idxmax(),
-            "User"
-        ]
 
         st.sidebar.success(
             f"Top Performer: {top_user}"
@@ -581,21 +567,22 @@ if question:
 
     elif "anomaly" in q:
 
-    anomaly_count = len(
-        user_features[
-            user_features["Anomaly"] == -1
-        ]
-    )
+        anomaly_count = len(
+            user_features[
+                user_features["Anomaly"] == -1
+            ]
+        )
 
-    st.sidebar.success(
-        f"Anomalies: {anomaly_count}"
-    )
+        st.sidebar.success(
+            f"Anomalies: {anomaly_count}"
+        )
 
     else:
 
         st.sidebar.info(
             "Try: highest risk, top performer, anomaly"
         )
+        
 # =====================================================
 # KPI SECTION
 # =====================================================
