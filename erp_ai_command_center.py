@@ -6,7 +6,9 @@ from sklearn.ensemble import IsolationForest
 import plotly.express as px
 import streamlit as st
 import joblib
-
+from sklearn.neighbors import LocalOutlierFactor
+from sklearn.cluster import KMeans
+import plotly.graph_objects as go
 
 # =====================================================
 # LOAD ERP DATA
@@ -100,6 +102,57 @@ selected_user = st.sidebar.selectbox(
 
 if selected_user != "ALL":
     df = df[df["User Name"] == selected_user]
+    
+    st.sidebar.markdown("---")
+st.sidebar.subheader(
+    "🤖 ERP AI Assistant"
+)
+
+question = st.sidebar.text_input(
+    "Ask ERP AI"
+)
+
+if question:
+
+    q = question.lower()
+
+    if "highest risk" in q:
+
+        risk_user = user_features.loc[
+            user_features[
+                "Risk_Score"
+            ].idxmax(),
+            "User"
+        ]
+
+        st.sidebar.success(
+            f"Highest Risk: {risk_user}"
+        )
+
+    elif "top performer" in q:
+
+        top_user = user_features.loc[
+            user_features[
+                "Productivity_Score"
+            ].idxmax(),
+            "User"
+        ]
+
+        st.sidebar.success(
+            f"Top Performer: {top_user}"
+        )
+
+    elif "anomaly" in q:
+
+        st.sidebar.success(
+            f"Anomalies: {len(anomalies)}"
+        )
+
+    else:
+
+        st.sidebar.info(
+            "Try: highest risk, top performer, anomaly"
+        )
 # =====================================================
 # CONVERT ERP DURATION TO MINUTES
 # =====================================================
@@ -313,6 +366,31 @@ user_features["Productivity_Score"] = (
 ) * 100
 
 # =====================================
+# USER CLUSTERING
+# =====================================
+
+kmeans = KMeans(
+    n_clusters=4,
+    random_state=42
+)
+
+user_features["Cluster"] = (
+    kmeans.fit_predict(X)
+)
+
+cluster_names = {
+    0: "Power Users",
+    1: "Normal Users",
+    2: "Casual Users",
+    3: "Special Cases"
+}
+
+user_features["Cluster_Name"] = (
+    user_features["Cluster"]
+    .map(cluster_names)
+)
+
+# =====================================
 # DEPARTMENT PRODUCTIVITY
 # =====================================
 
@@ -346,7 +424,51 @@ if len(department_cols) > 0:
         department_productivity["Duration_Minutes"] * 0.3
 
     )
+st.subheader("🏥 ERP Health Score")
 
+erp_health = (
+
+    user_features[
+        "Productivity_Score"
+    ].mean() * 0.4 +
+
+    user_features[
+        "Efficiency_Score"
+    ].mean() * 0.3 +
+
+    (100 -
+     user_features[
+         "Risk_Score"
+     ].mean()) * 0.3
+
+)
+
+fig_gauge = go.Figure(
+
+    go.Indicator(
+
+        mode="gauge+number",
+
+        value=erp_health,
+
+        title={
+            "text":"ERP Health"
+        },
+
+        gauge={
+            "axis":{
+                "range":[0,100]
+            }
+        }
+
+    )
+
+)
+
+st.plotly_chart(
+    fig_gauge,
+    use_container_width=True
+)
 # =====================================================
 # RISK SCORE
 # =====================================================
@@ -450,6 +572,29 @@ iso = IsolationForest(
 
 user_features["Anomaly"] = (
     iso.fit_predict(X)
+)
+
+# =====================================
+# LOF DETECTION
+# =====================================
+
+lof = LocalOutlierFactor(
+    n_neighbors=5,
+    contamination=0.05
+)
+
+user_features["LOF_Anomaly"] = (
+    lof.fit_predict(X)
+)
+
+user_features.loc[
+    user_features["LOF_Anomaly"] == -1,
+    "Risk_Score"
+] += 15
+
+user_features["Risk_Score"] = (
+    user_features["Risk_Score"]
+    .clip(0,100)
 )
 user_features.loc[
     user_features["Anomaly"] == -1,
@@ -847,7 +992,31 @@ st.dataframe(anomalies)
 # =====================================================
 # ALL USERS
 # =====================================================
+st.subheader("🥇 ERP Leaderboard")
 
+leaderboard = (
+
+    user_features
+    .sort_values(
+        "Productivity_Score",
+        ascending=False
+    )
+    .head(3)
+
+)
+
+medals = ["🥇", "🥈", "🥉"]
+
+for i, row in enumerate(
+    leaderboard.itertuples()
+):
+
+    st.write(
+        f"{medals[i]} "
+        f"{row.User} "
+        f"({row.Productivity_Score:.2f})"
+    )
+    
 st.subheader("📋 User Ranking")
 
 ranking = (
