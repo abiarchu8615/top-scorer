@@ -104,7 +104,7 @@ if selected_user != "ALL":
     df = df[df["User Name"] == selected_user]
     
     st.sidebar.markdown("---")
-st.sidebar.subheader(
+
    
 # =====================================================
 # CONVERT ERP DURATION TO MINUTES
@@ -539,7 +539,10 @@ risk_user = user_features.loc[
     "User"
 ]
 
- "🤖 ERP AI Assistant"
+st.sidebar.markdown("---")
+
+st.sidebar.subheader(
+    "🤖 ERP AI Assistant"
 )
 
 question = st.sidebar.text_input(
