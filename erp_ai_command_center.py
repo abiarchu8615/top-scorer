@@ -366,31 +366,6 @@ user_features["Productivity_Score"] = (
 ) * 100
 
 # =====================================
-# USER CLUSTERING
-# =====================================
-
-kmeans = KMeans(
-    n_clusters=4,
-    random_state=42
-)
-
-user_features["Cluster"] = (
-    kmeans.fit_predict(X)
-)
-
-cluster_names = {
-    0: "Power Users",
-    1: "Normal Users",
-    2: "Casual Users",
-    3: "Special Cases"
-}
-
-user_features["Cluster_Name"] = (
-    user_features["Cluster"]
-    .map(cluster_names)
-)
-
-# =====================================
 # DEPARTMENT PRODUCTIVITY
 # =====================================
 
@@ -545,19 +520,34 @@ X = user_features[
     ]
 ]
 
-y = user_features["Performance"]
+# =====================================
+# USER CLUSTERING
+# =====================================
 
-rf = RandomForestClassifier(
-    n_estimators=100,
+from sklearn.cluster import KMeans
+
+kmeans = KMeans(
+    n_clusters=4,
     random_state=42
 )
 
-rf.fit(X, y)
-
-joblib.dump(
-    rf,
-    "productivity_model.pkl"
+user_features["Cluster"] = (
+    kmeans.fit_predict(X)
 )
+
+cluster_names = {
+    0: "Power Users",
+    1: "Normal Users",
+    2: "Casual Users",
+    3: "Special Cases"
+}
+
+user_features["Cluster_Name"] = (
+    user_features["Cluster"]
+    .map(cluster_names)
+)
+
+y = user_features["Performance"]
 
 # =====================================================
 # ANOMALY DETECTION
