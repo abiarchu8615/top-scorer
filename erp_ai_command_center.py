@@ -581,9 +581,15 @@ if question:
 
     elif "anomaly" in q:
 
-        st.sidebar.success(
-            f"Anomalies: {len(anomalies)}"
-        )
+    anomaly_count = len(
+        user_features[
+            user_features["Anomaly"] == -1
+        ]
+    )
+
+    st.sidebar.success(
+        f"Anomalies: {anomaly_count}"
+    )
 
     else:
 
