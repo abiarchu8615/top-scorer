@@ -551,19 +551,7 @@ user_features["Risk_Score"] = (
     user_features["Risk_Score"]
     .clip(0,100)
 )
-# =====================================================
-# EXECUTIVE INSIGHTS
-# =====================================================
 
-top_user = user_features.loc[
-    user_features["Productivity_Score"].idxmax(),
-    "User"
-]
-
-risky_user = user_features.loc[
-    user_features["Risk_Score"].idxmax(),
-    "User"
-]
 
 # =====================================
 # ERP HEALTH SCORE
@@ -579,7 +567,19 @@ erp_health = (
      user_features["Risk_Score"].mean()) * 0.3
 
 )
+# =====================================================
+# EXECUTIVE INSIGHTS
+# =====================================================
 
+top_user = user_features.loc[
+    user_features["Productivity_Score"].idxmax(),
+    "User"
+]
+
+risk_user = user_features.loc[
+    user_features["Risk_Score"].idxmax(),
+    "User"
+]
 # =====================================================
 # KPI SECTION
 # =====================================================
