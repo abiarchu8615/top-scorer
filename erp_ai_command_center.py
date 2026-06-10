@@ -105,54 +105,7 @@ if selected_user != "ALL":
     
     st.sidebar.markdown("---")
 st.sidebar.subheader(
-    "🤖 ERP AI Assistant"
-)
-
-question = st.sidebar.text_input(
-    "Ask ERP AI"
-)
-
-if question:
-
-    q = question.lower()
-
-    if "highest risk" in q:
-
-        risk_user = user_features.loc[
-            user_features[
-                "Risk_Score"
-            ].idxmax(),
-            "User"
-        ]
-
-        st.sidebar.success(
-            f"Highest Risk: {risk_user}"
-        )
-
-    elif "top performer" in q:
-
-        top_user = user_features.loc[
-            user_features[
-                "Productivity_Score"
-            ].idxmax(),
-            "User"
-        ]
-
-        st.sidebar.success(
-            f"Top Performer: {top_user}"
-        )
-
-    elif "anomaly" in q:
-
-        st.sidebar.success(
-            f"Anomalies: {len(anomalies)}"
-        )
-
-    else:
-
-        st.sidebar.info(
-            "Try: highest risk, top performer, anomaly"
-        )
+   
 # =====================================================
 # CONVERT ERP DURATION TO MINUTES
 # =====================================================
@@ -482,8 +435,13 @@ X = user_features[
 
 from sklearn.cluster import KMeans
 
+n_clusters = min(
+    4,
+    len(user_features)
+)
+
 kmeans = KMeans(
-    n_clusters=4,
+    n_clusters=n_clusters,
     random_state=42
 )
 
@@ -580,6 +538,55 @@ risk_user = user_features.loc[
     user_features["Risk_Score"].idxmax(),
     "User"
 ]
+
+ "🤖 ERP AI Assistant"
+)
+
+question = st.sidebar.text_input(
+    "Ask ERP AI"
+)
+
+if question:
+
+    q = question.lower()
+
+    if "highest risk" in q:
+
+        risk_user = user_features.loc[
+            user_features[
+                "Risk_Score"
+            ].idxmax(),
+            "User"
+        ]
+
+        st.sidebar.success(
+            f"Highest Risk: {risk_user}"
+        )
+
+    elif "top performer" in q:
+
+        top_user = user_features.loc[
+            user_features[
+                "Productivity_Score"
+            ].idxmax(),
+            "User"
+        ]
+
+        st.sidebar.success(
+            f"Top Performer: {top_user}"
+        )
+
+    elif "anomaly" in q:
+
+        st.sidebar.success(
+            f"Anomalies: {len(anomalies)}"
+        )
+
+    else:
+
+        st.sidebar.info(
+            "Try: highest risk, top performer, anomaly"
+        )
 # =====================================================
 # KPI SECTION
 # =====================================================
@@ -603,7 +610,7 @@ col3.metric(
 
 col4.metric(
     "Highest Risk",
-    risky_user
+    risk_user
 )
 
 col5.metric(
@@ -692,8 +699,9 @@ if anomaly_count > 0:
 # DEPARTMENT COMPARISON
 # =====================================
 
-st.subheader("🏢 Department Productivity Comparison")
-fig_dept = px.bar(
+if department_productivity is not None:
+  st.subheader("🏢 Department Productivity Comparison")
+  fig_dept = px.bar(
 
     department_productivity,
 
