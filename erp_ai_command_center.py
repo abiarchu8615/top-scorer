@@ -9,6 +9,7 @@ import joblib
 from sklearn.neighbors import LocalOutlierFactor
 from sklearn.cluster import KMeans
 import plotly.graph_objects as go
+from sklearn.linear_model import LinearRegression
 
 # =====================================================
 # LOAD ERP DATA
@@ -730,6 +731,125 @@ if anomaly_count > 0:
     st.warning(
         f"🔍 AI detected {anomaly_count} suspicious users."
     )
+    
+    # =====================================================
+# AI RECOMMENDATIONS
+# =====================================================
+
+st.subheader("🤖 AI Recommendations")
+
+recommendations = []
+
+if user_features["Risk_Score"].mean() > 50:
+
+    recommendations.append(
+        "Reduce high-risk user activities."
+    )
+
+if user_features["Efficiency_Score"].mean() < 50:
+
+    recommendations.append(
+        "Conduct ERP refresher training."
+    )
+
+if anomaly_count > 0:
+
+    recommendations.append(
+        f"Investigate {anomaly_count} anomalous users."
+    )
+
+if len(recommendations) == 0:
+
+    recommendations.append(
+        "ERP usage appears healthy."
+    )
+
+for rec in recommendations:
+
+    st.info(rec)
+    
+  # =====================================================
+# PRODUCTIVITY FORECAST
+# =====================================================
+
+st.subheader("📈 Productivity Forecast")
+
+forecast_df = (
+    user_features
+    .sort_values(
+        "Productivity_Score"
+    )
+    .reset_index(drop=True)
+)
+
+forecast_df["Month"] = np.arange(
+    len(forecast_df)
+)
+
+model = LinearRegression()
+
+model.fit(
+    forecast_df[["Month"]],
+    forecast_df["Productivity_Score"]
+)
+
+next_month = len(forecast_df)
+
+prediction = model.predict(
+    [[next_month]]
+)[0]
+
+st.metric(
+    "Predicted Next Month Productivity",
+    round(prediction,2)
+)
+
+fig_forecast = px.line(
+
+    forecast_df,
+
+    x="Month",
+
+    y="Productivity_Score",
+
+    markers=True,
+
+    title="Productivity Trend"
+
+)
+
+st.plotly_chart(
+    fig_forecast,
+    use_container_width=True
+)
+  
+    # =====================================================
+# PRODUCTIVITY VS RISK
+# =====================================================
+
+st.subheader("🎯 Productivity vs Risk Matrix")
+
+fig_scatter = px.scatter(
+
+    user_features,
+
+    x="Productivity_Score",
+
+    y="Risk_Score",
+
+    color="Cluster_Name",
+
+    size="Total_Duration",
+
+    hover_name="User"
+
+)
+
+st.plotly_chart(
+    fig_scatter,
+    use_container_width=True
+)
+
 # =====================================
 # DEPARTMENT COMPARISON
 # =====================================
@@ -836,7 +956,39 @@ st.plotly_chart(
     use_container_width=True
 )
 
+# =====================================================
+# DEPARTMENT HEATMAP
+# =====================================================
 
+if department_productivity is not None:
+
+    st.subheader("🔥 Department Heatmap")
+
+    heatmap_data = department_productivity[
+        [
+            DEPT_COL,
+            "Productivity"
+        ]
+    ]
+
+    fig_heat = px.density_heatmap(
+
+        heatmap_data,
+
+        x=DEPT_COL,
+
+        y="Productivity",
+
+        text_auto=True
+
+    )
+
+    st.plotly_chart(
+        fig_heat,
+        use_container_width=True
+    )
+    
+    
 # =====================================================
 # TOP USERS
 # =====================================================
@@ -1053,6 +1205,52 @@ for i, row in enumerate(
         f"{row.User} "
         f"({row.Productivity_Score:.2f})"
     )
+    
+   # =====================================================
+# USER 360 PROFILE
+# =====================================================
+
+st.subheader("👤 User 360 Profile")
+
+selected_profile = st.selectbox(
+
+    "Select User Profile",
+
+    user_features["User"].tolist()
+
+)
+
+profile = user_features[
+    user_features["User"]
+    == selected_profile
+].iloc[0]
+
+col1,col2,col3,col4 = st.columns(4)
+
+col1.metric(
+    "Productivity",
+    round(profile["Productivity_Score"],2)
+)
+
+col2.metric(
+    "Risk",
+    round(profile["Risk_Score"],2)
+)
+
+col3.metric(
+    "Efficiency",
+    round(profile["Efficiency_Score"],2)
+)
+
+col4.metric(
+    "Cluster",
+    profile["Cluster_Name"]
+)
+
+st.dataframe(
+    profile.to_frame()
+) 
+    
     
 st.subheader("📋 User Ranking")
 
