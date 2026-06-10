@@ -38,6 +38,42 @@ except Exception as e:
 
 st.success("ERP file loaded successfully!")
 
+# ==========================
+# DEPARTMENT FILTER
+# ==========================
+
+department_cols = [
+    col for col in df.columns
+    if "department" in col.lower()
+]
+
+if len(department_cols) > 0:
+
+    DEPT_COL = department_cols[0]
+
+    department_list = sorted(
+        df[DEPT_COL]
+        .dropna()
+        .unique()
+        .tolist()
+    )
+
+    selected_department = st.sidebar.selectbox(
+        "Select Department",
+        ["ALL"] + department_list
+    )
+
+    if selected_department != "ALL":
+
+        df = df[
+            df[DEPT_COL]
+            == selected_department
+        ]
+
+else:
+
+    selected_department = "ALL"
+    
 # =====================================================
 # MENU FILTER
 # =====================================================
@@ -85,42 +121,7 @@ if selected_process != "ALL":
     df = df[df["Process Name"] == selected_process]
 
 
-# ==========================
-# DEPARTMENT FILTER
-# ==========================
 
-department_cols = [
-    col for col in df.columns
-    if "department" in col.lower()
-]
-
-if len(department_cols) > 0:
-
-    DEPT_COL = department_cols[0]
-
-    department_list = sorted(
-        df[DEPT_COL]
-        .dropna()
-        .unique()
-        .tolist()
-    )
-
-    selected_department = st.sidebar.selectbox(
-        "Select Department",
-        ["ALL"] + department_list
-    )
-
-    if selected_department != "ALL":
-
-        df = df[
-            df[DEPT_COL]
-            == selected_department
-        ]
-
-else:
-
-    selected_department = "ALL"
-    
     
 # ==========================
 # USER FILTER
