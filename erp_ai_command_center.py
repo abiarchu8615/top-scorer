@@ -399,51 +399,7 @@ if len(department_cols) > 0:
         department_productivity["Duration_Minutes"] * 0.3
 
     )
-st.subheader("🏥 ERP Health Score")
 
-erp_health = (
-
-    user_features[
-        "Productivity_Score"
-    ].mean() * 0.4 +
-
-    user_features[
-        "Efficiency_Score"
-    ].mean() * 0.3 +
-
-    (100 -
-     user_features[
-         "Risk_Score"
-     ].mean()) * 0.3
-
-)
-
-fig_gauge = go.Figure(
-
-    go.Indicator(
-
-        mode="gauge+number",
-
-        value=erp_health,
-
-        title={
-            "text":"ERP Health"
-        },
-
-        gauge={
-            "axis":{
-                "range":[0,100]
-            }
-        }
-
-    )
-
-)
-
-st.plotly_chart(
-    fig_gauge,
-    use_container_width=True
-)
 # =====================================================
 # RISK SCORE
 # =====================================================
@@ -608,6 +564,22 @@ risky_user = user_features.loc[
     user_features["Risk_Score"].idxmax(),
     "User"
 ]
+
+# =====================================
+# ERP HEALTH SCORE
+# =====================================
+
+erp_health = (
+
+    user_features["Productivity_Score"].mean() * 0.4 +
+
+    user_features["Efficiency_Score"].mean() * 0.3 +
+
+    (100 -
+     user_features["Risk_Score"].mean()) * 0.3
+
+)
+
 # =====================================================
 # KPI SECTION
 # =====================================================
@@ -820,6 +792,8 @@ st.plotly_chart(
     fig_menu,
     use_container_width=True
 )
+
+
 # =====================================================
 # TOP USERS
 # =====================================================
@@ -960,6 +934,36 @@ fig2 = px.pie(
 
 st.plotly_chart(
     fig2,
+    use_container_width=True
+)
+
+
+import plotly.graph_objects as go
+
+st.subheader("🏥 ERP Health Score")
+
+fig_gauge = go.Figure(
+
+    go.Indicator(
+
+        mode="gauge+number",
+
+        value=erp_health,
+
+        title={"text":"ERP Health"},
+
+        gauge={
+            "axis":{
+                "range":[0,100]
+            }
+        }
+
+    )
+
+)
+
+st.plotly_chart(
+    fig_gauge,
     use_container_width=True
 )
 
